@@ -1,0 +1,278 @@
+{
+  "categories": [
+    {
+      "id": "chinese",
+      "name": "国产剧",
+      "items": [
+        {
+          "id": "1",
+          "title": "庆余年第二季",
+          "cover": "https://example.com/qingyu2.jpg",
+          "description": "范闲在京都的权谋斗争继续升级",
+          "rating": 9.2,
+          "year": 2024,
+          "episodes": 36,
+          "status": "已完结",
+          "link": [
+            "https://pan.quark.cn/s/xxxxx",
+            "https://pan.baidu.com/s/xxxxx"
+          ],
+          "driveType": [
+            "夸克网盘",
+            "百度网盘"
+          ],
+          "tags": ["古装", "权谋", "喜剧"],
+          "updatedAt": "2024-12-01"
+        },
+        {
+          "id": "2",
+          "title": "繁花",
+          "cover": "https://example.com/fanhua.jpg",
+          "description": "九十年代上海滩的商战传奇",
+          "rating": 8.8,
+          "year": 2023,
+          "episodes": 30,
+          "status": "已完结",
+          "link": "https://pan.baidu.com/s/xxxxx",
+          "driveType": "百度网盘",
+          "tags": ["都市", "商战", "爱情"],
+          "updatedAt": "2024-11-28"
+        },
+        {
+          "id": "2",
+          "title": "繁花",
+          "cover": "https://example.com/fanhua.jpg",
+          "description": "九十年代上海滩的商战传奇",
+          "rating": 8.8,
+          "year": 2023,
+          "episodes": 30,
+          "status": "已完结",
+          "link": "https://pan.baidu.com/s/xxxxx",
+          "driveType": "百度网盘",
+          "tags": ["都市", "商战", "爱情"],
+          "updatedAt": "2024-11-28"
+        },
+        {
+          "id": "2",
+          "title": "繁花",
+          "cover": "https://example.com/fanhua.jpg",
+          "description": "九十年代上海滩的商战传奇",
+          "rating": 8.8,
+          "year": 2023,
+          "episodes": 30,
+          "status": "已完结",
+          "link": "https://pan.baidu.com/s/xxxxx",
+          "driveType": "百度网盘",
+          "tags": ["都市", "商战", "爱情"],
+          "updatedAt": "2024-11-28"
+        },
+        {
+          "id": "2",
+          "title": "繁花",
+          "cover": "https://example.com/fanhua.jpg",
+          "description": "九十年代上海滩的商战传奇",
+          "rating": 8.8,
+          "year": 2023,
+          "episodes": 30,
+          "status": "已完结",
+          "link": "https://pan.baidu.com/s/xxxxx",
+          "driveType": "百度网盘",
+          "tags": ["都市", "商战", "爱情"],
+          "updatedAt": "2024-11-28"
+        },
+        {
+          "id": "2",
+          "title": "繁花",
+          "cover": "https://example.com/fanhua.jpg",
+          "description": "九十年代上海滩的商战传奇",
+          "rating": 8.8,
+          "year": 2023,
+          "episodes": 30,
+          "status": "已完结",
+          "link": "https://pan.baidu.com/s/xxxxx",
+          "driveType": "百度网盘",
+          "tags": ["都市", "商战", "爱情"],
+          "updatedAt": "2024-11-28"
+        },
+        {
+          "id": "2",
+          "title": "繁花",
+          "cover": "https://example.com/fanhua.jpg",
+          "description": "九十年代上海滩的商战传奇",
+          "rating": 8.8,
+          "year": 2023,
+          "episodes": 30,
+          "status": "已完结",
+          "link": "https://pan.baidu.com/s/xxxxx",
+          "driveType": "百度网盘",
+          "tags": ["都市", "商战", "爱情"],
+          "updatedAt": "2024-11-28"
+        },
+        {
+          "id": "2",
+          "title": "繁花",
+          "cover": "https://example.com/fanhua.jpg",
+          "description": "九十年代上海滩的商战传奇",
+          "rating": 8.8,
+          "year": 2023,
+          "episodes": 30,
+          "status": "已完结",
+          "link": "https://pan.baidu.com/s/xxxxx",
+          "driveType": "百度网盘",
+          "tags": ["都市", "商战", "爱情"],
+          "updatedAt": "2024-11-28"
+        },
+        {
+          "id": "2",
+          "title": "繁花",
+          "cover": "https://example.com/fanhua.jpg",
+          "description": "九十年代上海滩的商战传奇",
+          "rating": 8.8,
+          "year": 2023,
+          "episodes": 30,
+          "status": "已完结",
+          "link": "https://pan.baidu.com/s/xxxxx",
+          "driveType": "百度网盘",
+          "tags": ["都市", "商战", "爱情"],
+          "updatedAt": "2024-11-28"
+        },
+        {
+          "id": "2",
+          "title": "繁花",
+          "cover": "https://example.com/fanhua.jpg",
+          "description": "九十年代上海滩的商战传奇",
+          "rating": 8.8,
+          "year": 2023,
+          "episodes": 30,
+          "status": "已完结",
+          "link": "https://pan.baidu.com/s/xxxxx",
+          "driveType": "百度网盘",
+          "tags": ["都市", "商战", "爱情"],
+          "updatedAt": "2024-11-28"
+        },
+        {
+          "id": "2",
+          "title": "繁花",
+          "cover": "https://example.com/fanhua.jpg",
+          "description": "九十年代上海滩的商战传奇",
+          "rating": 8.8,
+          "year": 2023,
+          "episodes": 30,
+          "status": "已完结",
+          "link": "https://pan.baidu.com/s/xxxxx",
+          "driveType": "百度网盘",
+          "tags": ["都市", "商战", "爱情"],
+          "updatedAt": "2024-11-28"
+        }
+      ]
+    },
+    {
+      "id": "korean",
+      "name": "韩剧",
+      "items": [
+        {
+          "id": "3",
+          "title": "黑暗荣耀",
+          "cover": "https://example.com/darkglory.jpg",
+          "description": "校园暴力受害者的复仇故事",
+          "rating": 9.0,
+          "year": 2023,
+          "episodes": 16,
+          "status": "已完结",
+          "link": [
+            "https://www.aliyundrive.com/s/xxxxx",
+            "https://pan.quark.cn/s/yyyyy"
+          ],
+          "driveType": [
+            "阿里云盘",
+            "夸克网盘"
+          ],
+          "tags": ["复仇", "悬疑", "剧情"],
+          "updatedAt": "2024-12-02"
+        }
+      ]
+    },
+    {
+      "id": "western",
+      "name": "欧美剧",
+      "items": [
+        {
+          "id": "4",
+          "title": "最后生还者",
+          "cover": "https://example.com/tlou.jpg",
+          "description": "末日后的生存之旅",
+          "rating": 9.5,
+          "year": 2023,
+          "episodes": 9,
+          "status": "第一季完结",
+          "link": "https://pan.quark.cn/s/xxxxx",
+          "driveType": "夸克网盘",
+          "tags": ["末日", "冒险", "剧情"],
+          "updatedAt": "2024-11-30"
+        }
+      ]
+    },
+    {
+      "id": "japanese",
+      "name": "日剧",
+      "items": [
+        {
+          "id": "5",
+          "title": "重启人生",
+          "cover": "https://example.com/restart.jpg",
+          "description": "为了积德重生而不断重复人生的故事",
+          "rating": 9.3,
+          "year": 2023,
+          "episodes": 10,
+          "status": "已完结",
+          "link": "https://pan.baidu.com/s/xxxxx",
+          "driveType": "百度网盘",
+          "tags": ["奇幻", "友情", "治愈"],
+          "updatedAt": "2024-12-01"
+        }
+      ]
+    },
+    {
+      "id": "thai",
+      "name": "泰剧",
+      "items": [
+        {
+          "id": "6",
+          "title": "禁忌女孩",
+          "cover": "https://example.com/girlfromnowhere.jpg",
+          "description": "神秘女孩揭露人性黑暗面",
+          "rating": 8.5,
+          "year": 2021,
+          "episodes": 13,
+          "status": "第二季完结",
+          "link": "https://www.aliyundrive.com/s/xxxxx",
+          "driveType": "阿里云盘",
+          "tags": ["悬疑", "惊悚", "社会"],
+          "updatedAt": "2024-11-25"
+        }
+      ]
+    },
+    {
+      "id": "taiwanese",
+      "name": "台剧",
+      "items": [
+        {
+          "id": "7",
+          "title": "想见你",
+          "cover": "https://example.com/someday.jpg",
+          "description": "穿越时空的爱情故事",
+          "rating": 9.1,
+          "year": 2019,
+          "episodes": 13,
+          "status": "已完结",
+          "link": "https://pan.quark.cn/s/xxxxx",
+          "driveType": "夸克网盘",
+          "tags": ["爱情", "穿越", "悬疑"],
+          "updatedAt": "2024-12-03"
+        }
+      ]
+    }
+  ],
+  "lastUpdated": "2024-12-03T10:00:00Z",
+  "totalItems": 7
+}

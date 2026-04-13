@@ -1,0 +1,504 @@
+---
+import { Icon } from "astro-icon/components";
+import { siteConfig } from "@/config";
+import I18nKey from "@/i18n/i18nKey";
+import { i18n } from "@/i18n/translation";
+import MainGridLayout from "@/layouts/MainGridLayout.astro";
+import type { DramaData, DramaItem } from "@/types/drama";
+import { formatDateI18nWithTime } from "@/utils/date-utils";
+
+// 检查页面是否启用
+if (!siteConfig.pages.drama) {
+	return Astro.redirect("/404/");
+}
+
+// 导入影视数据
+import dramaDataRaw from "@/data/drama.json";
+const dramaData = dramaDataRaw as DramaData;
+
+// 获取构建时间
+const buildTime = formatDateI18nWithTime(new Date(dramaData.lastUpdated));
+
+// 准备 tabs 数据
+const tabs = dramaData.categories.map((category) => ({
+	id: category.id,
+	name: category.name,
+	count: category.items.length,
+}));
+
+const activeTab = tabs[0]?.id || "chinese";
+
+// 辅助函数：获取所有影视项目（用于搜索）
+function getAllItems(): Array<DramaItem & { categoryId: string; categoryName: string }> {
+	const allItems: Array<DramaItem & { categoryId: string; categoryName: string }> = [];
+	dramaData.categories.forEach((category) => {
+		category.items.forEach((item) => {
+			allItems.push({
+				...item,
+				categoryId: category.id,
+				categoryName: category.name,
+			});
+		});
+	});
+	return allItems;
+}
+---
+
+<MainGridLayout title={i18n(I18nKey.drama)} description={i18n(I18nKey.dramaSubtitle)}>
+  <div class="flex w-full rounded-(--radius-large) overflow-hidden relative min-h-32">
+    <div class="card-base z-10 px-6 py-8 md:px-9 md:py-10 relative w-full">
+        <!-- 页面标题区域 -->
+        <div class="relative w-full mb-6">
+            <div class="mb-4">
+                <div class="flex items-center gap-4 mb-3">
+                    <div class="h-12 w-12 rounded-xl bg-gradient-to-br from-(--primary) to-(--primary-light) flex items-center justify-center text-white shadow-lg">
+                        <Icon name="material-symbols:movie" class="text-[2rem]"></Icon>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl md:text-4xl font-bold text-neutral-900 dark:text-neutral-100">
+                            {i18n(I18nKey.drama)}
+                        </h1>
+                    </div>
+                </div>
+                <p class="text-sm text-neutral-500 dark:text-neutral-400">
+                    {i18n(I18nKey.dramaLastUpdated)} {buildTime} · {i18n(I18nKey.dramaTotalCount)} <strong class="text-(--primary)">{dramaData.totalItems}</strong> 部
+                </p>
+            </div>
+
+      <!-- 搜索框 -->
+      <div class="mb-6">
+        <div class="relative">
+          <Icon name="material-symbols:search" class="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400 text-xl" />
+          <input
+            type="text"
+            id="drama-search"
+            placeholder="搜索剧名、标签、描述..."
+            class="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-(--line-divider) bg-white dark:bg-gray-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 focus:border-(--primary) focus:outline-none transition-colors"
+          />
+          <button
+            id="drama-search-clear"
+            class="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 hidden"
+          >
+            <Icon name="material-symbols:close" class="text-xl" />
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab 导航 -->
+      <div class="border-b border-(--line-divider) mb-6">
+        <nav class="flex space-x-2 md:space-x-6 overflow-x-auto scrollbar-hide" aria-label="Tabs" id="drama-tabs">
+          {tabs.map((tab) => (
+            <button
+              class:list={[
+                "whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm transition-all duration-200 rounded-t-lg",
+                {
+                  "border-(--primary) text-(--primary) bg-(--primary)/5": tab.id === activeTab,
+                  "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50": tab.id !== activeTab
+                }
+              ]}
+              data-tab={tab.id}
+              type="button"
+            >
+              <span class="flex items-center gap-2">
+                {tab.name}
+                <span class:list={[
+                  "py-0.5 px-2 rounded-full text-xs font-semibold",
+                  {
+                    "bg-(--primary) text-white": tab.id === activeTab,
+                    "bg-(--btn-regular-bg) text-(--btn-content)": tab.id !== activeTab
+                  }
+                ]}>
+                  {tab.count}
+                </span>
+              </span>
+            </button>
+          ))}
+        </nav>
+      </div>
+
+      <!-- 搜索结果提示 -->
+      <div id="search-results-info" class="hidden mb-4 p-3 bg-(--primary)/5 rounded-lg">
+        <p class="text-sm text-neutral-600 dark:text-neutral-400">
+          找到 <strong id="search-count" class="text-(--primary)">0</strong> 个结果
+        </p>
+      </div>
+
+      <!-- 内容区域 -->
+      {dramaData.categories.map((category) => (
+        <div
+          data-section={category.id}
+          class={`tab-content ${category.id === activeTab ? '' : 'hidden'}`}
+        >
+          {category.items.length > 0 ? (
+            <div class="space-y-3">
+              {category.items.map((item) => (
+                <a
+                  href={`/drama/${item.id}/`}
+                  class="group block card-base p-4 hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 search-item"
+                  data-title={item.title.toLowerCase()}
+                  data-tags={(item.tags || []).join(' ').toLowerCase()}
+                  data-description={(item.description || '').toLowerCase()}
+                >
+                  <div class="flex gap-4">
+                    <!-- PC端显示图片，手机端隐藏 -->
+                    {item.cover && (
+                      <div class="hidden md:block flex-shrink-0">
+                        <div class="w-20 h-28 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                          <img
+                            src={item.cover}
+                            alt={item.title}
+                            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                            loading="lazy"
+                          />
+                        </div>
+                      </div>
+                    )}
+                    
+                    <!-- 内容区域 -->
+                    <div class="flex-1 min-w-0">
+                      <!-- 标题和评分 -->
+                      <div class="flex items-start justify-between gap-2 mb-2">
+                        <h3 class="text-lg font-bold text-neutral-900 dark:text-neutral-100 group-hover:text-(--primary) transition-colors line-clamp-1">
+                          {item.title}
+                        </h3>
+                        {item.rating && (
+                          <span class="flex-shrink-0 flex items-center gap-1 px-2 py-1 rounded-lg bg-black/5 dark:bg-white/5 text-xs font-bold">
+                            <Icon name="material-symbols:star" class="text-yellow-500 text-sm" />
+                            {item.rating}
+                          </span>
+                        )}
+                      </div>
+                      
+                      <!-- 描述（仅PC端显示） -->
+                      {item.description && (
+                        <p class="hidden md:block text-sm text-neutral-600 dark:text-neutral-400 mb-2 line-clamp-2">
+                          {item.description}
+                        </p>
+                      )}
+                      
+                      <!-- 元信息 -->
+                      <div class="flex items-center gap-3 text-xs text-neutral-500 dark:text-neutral-500">
+                        {item.year && (
+                          <span class="flex items-center gap-1">
+                            <Icon name="material-symbols:calendar-today" class="text-sm" />
+                            {item.year}
+                          </span>
+                        )}
+                        {item.episodes && (
+                          <span class="flex items-center gap-1">
+                            <Icon name="material-symbols:tv" class="text-sm" />
+                            {item.episodes}集
+                          </span>
+                        )}
+                        {item.status && (
+                          <span class="px-2 py-0.5 rounded bg-(--primary)/10 text-(--primary)">
+                            {item.status}
+                          </span>
+                        )}
+                      </div>
+                      
+                      <!-- 标签（仅PC端显示前3个） -->
+                      {item.tags && item.tags.length > 0 && (
+                        <div class="hidden md:flex flex-wrap gap-1.5 mt-2">
+                          {item.tags.slice(0, 3).map((tag) => (
+                            <span class="px-2 py-0.5 text-xs bg-(--btn-regular-bg) text-(--btn-content) rounded-md">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    
+                    <!-- 箭头图标 -->
+                    <div class="hidden md:flex items-center">
+                      <Icon name="material-symbols:chevron-right" class="text-xl text-neutral-400 group-hover:text-(--primary) transition-colors" />
+                    </div>
+                  </div>
+                </a>
+              ))}
+            </div>
+          ) : (
+            <div class="text-center py-20">
+              <div class="inline-flex items-center justify-center w-20 h-20 bg-(--btn-regular-bg) rounded-full mb-6 border-2 border-dashed border-(--line-divider)">
+                <Icon name="material-symbols:movie-off" class="text-[2.5rem] text-(--btn-content)" />
+              </div>
+              <h2 class="text-xl font-semibold text-black/80 dark:text-white/80 mb-3">
+                {i18n(I18nKey.dramaEmpty)}
+              </h2>
+              <p class="text-black/60 dark:text-white/60 max-w-md mx-auto">
+                {i18n(I18nKey.dramaEmptyReason)}
+              </p>
+            </div>
+          )}
+        </div>
+      ))}
+
+      <!-- 无搜索结果提示 -->
+      <div id="no-search-results" class="hidden text-center py-20">
+        <Icon name="material-symbols:search-off" class="text-6xl text-neutral-300 dark:text-neutral-600 mb-4" />
+        <h3 class="text-lg font-semibold text-neutral-700 dark:text-neutral-300 mb-2">未找到相关结果</h3>
+        <p class="text-sm text-neutral-500 dark:text-neutral-500">试试其他关键词吧</p>
+      </div>
+		</div>
+    </div>
+  </div>
+</MainGridLayout>
+
+<style>
+  .tab-content {
+    display: block;
+    animation: fadeInUp 0.4s ease-out;
+  }
+  
+  .tab-content.hidden {
+    display: none;
+  }
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(15px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+</style>
+
+<script is:inline>
+  (function() {
+    var isInitialized = false;
+    
+    function initDramaTabs() {
+      if (isInitialized) {
+        return;
+      }
+      
+      var tabButtons = document.querySelectorAll('#drama-tabs [data-tab]');
+      var sections = document.querySelectorAll('[data-section]');
+
+      if (tabButtons.length === 0 || sections.length === 0) {
+        return;
+      }
+
+      isInitialized = true;
+
+      function activateTab(targetTab) {
+        if (!targetTab) return;
+
+        tabButtons.forEach(function(btn) {
+          var button = btn;
+          var isActive = button.dataset.tab === targetTab;
+          
+          if (isActive) {
+            button.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300', 'dark:text-gray-400', 'dark:hover:text-gray-300', 'hover:bg-gray-50', 'dark:hover:bg-gray-800/50');
+            button.classList.add('border-(--primary)', 'text-(--primary)', 'bg-(--primary)/5');
+          } else {
+            button.classList.remove('border-(--primary)', 'text-(--primary)', 'bg-(--primary)/5');
+            button.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300', 'dark:text-gray-400', 'dark:hover:text-gray-300', 'hover:bg-gray-50', 'dark:hover:bg-gray-800/50');
+          }
+          
+          var badgeWrapper = button.querySelector('span');
+          if (badgeWrapper && badgeWrapper.children.length > 0) {
+            var badge = badgeWrapper.children[0];
+            if (isActive) {
+              badge.classList.remove('bg-(--btn-regular-bg)', 'text-(--btn-content)');
+              badge.classList.add('bg-(--primary)', 'text-white');
+            } else {
+              badge.classList.remove('bg-(--primary)', 'text-white');
+              badge.classList.add('bg-(--btn-regular-bg)', 'text-(--btn-content)');
+            }
+          }
+        });
+
+        sections.forEach(function(section) {
+          var htmlSection = section;
+          if (htmlSection.dataset.section === targetTab) {
+            htmlSection.classList.remove('hidden');
+          } else {
+            htmlSection.classList.add('hidden');
+          }
+        });
+
+        var nextHash = '#' + encodeURIComponent(targetTab);
+        if (window.location.hash !== nextHash) {
+          window.history.replaceState(null, '', nextHash);
+        }
+      }
+
+      function getTabFromHash() {
+        var hash = window.location.hash.replace(/^#/, '');
+        if (!hash) return '';
+        try {
+          return decodeURIComponent(hash);
+        } catch (e) {
+          return '';
+        }
+      }
+
+      tabButtons.forEach(function(button) {
+        button.addEventListener('click', function(event) {
+          event.preventDefault();
+          var currentButton = event.currentTarget;
+          var targetTab = currentButton.dataset.tab;
+          if (targetTab) {
+            activateTab(targetTab);
+          }
+        });
+      });
+
+      var initialTab = getTabFromHash();
+      if (initialTab) {
+        activateTab(initialTab);
+      } else if (tabButtons.length > 0) {
+        var firstTab = tabButtons[0].dataset.tab;
+        if (firstTab) {
+          activateTab(firstTab);
+        }
+      }
+    }
+
+    // 搜索功能
+    function initSearch() {
+      var searchInput = document.getElementById('drama-search');
+      var clearButton = document.getElementById('drama-search-clear');
+      var resultsInfo = document.getElementById('search-results-info');
+      var searchCount = document.getElementById('search-count');
+      var noResults = document.getElementById('no-search-results');
+
+      if (!searchInput) return;
+
+      function performSearch(query) {
+        query = query.toLowerCase().trim();
+        
+        // 显示/隐藏清除按钮
+        if (clearButton) {
+          if (query.length > 0) {
+            clearButton.classList.remove('hidden');
+          } else {
+            clearButton.classList.add('hidden');
+          }
+        }
+
+        // 如果没有搜索词，显示所有内容
+        if (query.length === 0) {
+          var allItems = document.querySelectorAll('.search-item');
+          allItems.forEach(function(item) {
+            item.style.display = 'block';
+          });
+          
+          if (resultsInfo) resultsInfo.classList.add('hidden');
+          if (noResults) noResults.classList.add('hidden');
+          return;
+        }
+
+        // 搜索所有项目
+        var allItems = document.querySelectorAll('.search-item');
+        var visibleCount = 0;
+
+        allItems.forEach(function(item) {
+          var title = item.getAttribute('data-title') || '';
+          var tags = item.getAttribute('data-tags') || '';
+          var description = item.getAttribute('data-description') || '';
+          
+          if (title.includes(query) || tags.includes(query) || description.includes(query)) {
+            item.style.display = 'block';
+            visibleCount++;
+          } else {
+            item.style.display = 'none';
+          }
+        });
+
+        // 显示搜索结果信息
+        if (resultsInfo && searchCount) {
+          searchCount.textContent = visibleCount;
+          resultsInfo.classList.remove('hidden');
+        }
+
+        // 显示无结果提示
+        if (noResults) {
+          if (visibleCount === 0) {
+            noResults.classList.remove('hidden');
+          } else {
+            noResults.classList.add('hidden');
+          }
+        }
+      }
+
+      // 输入事件
+      var debounceTimer;
+      searchInput.addEventListener('input', function(e) {
+        clearTimeout(debounceTimer);
+        var query = e.target.value;
+        debounceTimer = setTimeout(function() {
+          performSearch(query);
+        }, 300);
+      });
+
+      // 清除按钮
+      if (clearButton) {
+        clearButton.addEventListener('click', function() {
+          searchInput.value = '';
+          performSearch('');
+          searchInput.focus();
+        });
+      }
+    }
+
+    // 初始化
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+          initDramaTabs();
+          initSearch();
+        }, 100);
+      });
+    } else {
+      setTimeout(function() {
+        initDramaTabs();
+        initSearch();
+      }, 100);
+    }
+
+    // SWUP 事件
+    document.addEventListener('swup:contentReplaced', function() {
+      isInitialized = false;
+      setTimeout(function() {
+        initDramaTabs();
+        initSearch();
+      }, 100);
+    });
+
+    window.addEventListener('astro:page-load', function() {
+      isInitialized = false;
+      setTimeout(function() {
+        initDramaTabs();
+        initSearch();
+      }, 100);
+    });
+  })();
+</script>

@@ -1,0 +1,248 @@
+---
+import { Icon } from "astro-icon/components";
+import { siteConfig } from "@/config";
+import I18nKey from "@/i18n/i18nKey";
+import { i18n } from "@/i18n/translation";
+import MainGridLayout from "@/layouts/MainGridLayout.astro";
+import type { DramaItem, DramaData } from "@/types/drama";
+import { formatDateI18nWithTime } from "@/utils/date-utils";
+
+// 导入影视数据 - 放在最顶部，确保在 getStaticPaths 之前完全加载
+import dramaDataRaw from "@/data/drama.json";
+
+// getStaticPaths - 为每个影视项目生成静态页面
+export async function getStaticPaths() {
+	// 检查页面是否启用，如果禁用则返回空数组，不生成任何页面
+	if (!siteConfig.pages.drama) {
+		return [];
+	}
+
+	const dramaData = dramaDataRaw as DramaData;
+	const paths = [];
+	
+	for (const category of dramaData.categories) {
+		for (const item of category.items) {
+			paths.push({
+				params: { id: item.id },
+				props: {
+					item: item,
+					categoryName: category.name,
+				},
+			});
+		}
+	}
+	
+	return paths;
+}
+
+// 检查页面是否启用（针对直接访问的情况，虽然 getStaticPaths 为空时不会生成页面，但为了保险）
+if (!siteConfig.pages.drama) {
+	return Astro.redirect("/404/");
+}
+
+// 获取路由参数和 props
+const { id } = Astro.params;
+const { item, categoryName } = Astro.props as {
+	item: DramaItem;
+	categoryName: string;
+};
+
+// 如果找不到，重定向到404
+if (!item) {
+	return Astro.redirect("/404/");
+}
+
+// 导入数据用于页面渲染（虽然在 props 中已经有了，但如果需要全局数据如 lastUpdated 可以再次引用）
+const dramaData = dramaDataRaw as DramaData;
+
+// 辅助函数：获取网盘链接数组
+function getLinks(item: DramaItem): Array<{ url: string; type: string }> {
+	if (!item.link) return [];
+	
+	const links = Array.isArray(item.link) ? item.link : [item.link];
+	const types = Array.isArray(item.driveType) ? item.driveType : 
+	              (item.driveType ? [item.driveType] : []);
+	
+	return links.map((url, index) => ({
+		url,
+		type: types[index] || "网盘"
+	}));
+}
+
+// 辅助函数：获取网盘类型图标
+function getDriveIcon(driveType: string): string {
+	const type = driveType.toLowerCase();
+	if (type.includes('夸克')) return 'material-symbols:cloud-circle';
+	if (type.includes('百度')) return 'material-symbols:cloud-sync';
+	if (type.includes('阿里') || type.includes('aliyun')) return 'material-symbols:cloud-done';
+	if (type.includes('迅雷')) return 'material-symbols:cloud-upload';
+	return 'material-symbols:cloud-download';
+}
+
+const buildTime = formatDateI18nWithTime(new Date(dramaData.lastUpdated));
+const links = getLinks(item);
+---
+
+<MainGridLayout title={item.title} description={item.description || i18n(I18nKey.dramaSubtitle)}>
+  <div class="flex w-full rounded-(--radius-large) overflow-hidden relative min-h-32">
+    <div class="card-base z-10 px-6 py-8 md:px-9 md:py-10 relative w-full max-w-5xl mx-auto">
+      
+      <!-- 返回按钮 -->
+      <div class="mb-6">
+        <a href="/drama/" class="inline-flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400 hover:text-(--primary) transition-colors">
+          <Icon name="material-symbols:arrow-back" class="text-lg" />
+          <span>返回影视列表</span>
+        </a>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- 左侧：封面图 -->
+        <div class="md:col-span-1">
+          {item.cover ? (
+            <div class="relative aspect-[2/3] rounded-xl overflow-hidden shadow-lg bg-gray-100 dark:bg-gray-800">
+              <img
+                src={item.cover}
+                alt={item.title}
+                class="w-full h-full object-cover"
+                loading="lazy"
+              />
+              <!-- 评分徽章 -->
+              {item.rating && (
+                <div class="absolute top-4 right-4 px-3 py-1.5 rounded-lg bg-black/70 backdrop-blur-sm text-white text-sm font-bold flex items-center gap-1.5">
+                  <Icon name="material-symbols:star" class="text-yellow-400" />
+                  <span>{item.rating}</span>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div class="aspect-[2/3] rounded-xl bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center">
+              <Icon name="material-symbols:image-not-supported" class="text-6xl text-gray-400" />
+            </div>
+          )}
+        </div>
+
+        <!-- 右侧：详细信息 -->
+        <div class="md:col-span-2">
+          <!-- 分类标签 -->
+          <div class="mb-3">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-(--primary)/10 text-(--primary) text-sm font-medium">
+              <Icon name="material-symbols:category" class="text-base" />
+              {categoryName}
+            </span>
+          </div>
+
+          <!-- 标题 -->
+          <h1 class="text-3xl md:text-4xl font-bold text-neutral-900 dark:text-neutral-100 mb-4">
+            {item.title}
+          </h1>
+
+          <!-- 描述 -->
+          {item.description && (
+            <p class="text-base text-neutral-600 dark:text-neutral-400 leading-relaxed mb-6">
+              {item.description}
+            </p>
+          )}
+
+          <!-- 元信息网格 -->
+          <div class="grid grid-cols-2 gap-4 mb-6 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+            {item.year && (
+              <div class="flex items-center gap-2">
+                <Icon name="material-symbols:calendar-today" class="text-(--primary)" />
+                <div>
+                  <div class="text-xs text-neutral-500 dark:text-neutral-500">{i18n(I18nKey.dramaYear)}</div>
+                  <div class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">{item.year}</div>
+                </div>
+              </div>
+            )}
+            
+            {item.episodes && (
+              <div class="flex items-center gap-2">
+                <Icon name="material-symbols:tv" class="text-(--primary)" />
+                <div>
+                  <div class="text-xs text-neutral-500 dark:text-neutral-500">{i18n(I18nKey.dramaEpisodes)}</div>
+                  <div class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">{item.episodes} 集</div>
+                </div>
+              </div>
+            )}
+            
+            {item.status && (
+              <div class="flex items-center gap-2">
+                <Icon name="material-symbols:info" class="text-(--primary)" />
+                <div>
+                  <div class="text-xs text-neutral-500 dark:text-neutral-500">{i18n(I18nKey.dramaStatus)}</div>
+                  <div class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">{item.status}</div>
+                </div>
+              </div>
+            )}
+            
+            {item.rating && (
+              <div class="flex items-center gap-2">
+                <Icon name="material-symbols:star" class="text-yellow-500" />
+                <div>
+                  <div class="text-xs text-neutral-500 dark:text-neutral-500">{i18n(I18nKey.dramaRating)}</div>
+                  <div class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">{item.rating} / 10</div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <!-- 标签 -->
+          {item.tags && item.tags.length > 0 && (
+            <div class="mb-6">
+              <h3 class="text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-3 flex items-center gap-2">
+                <Icon name="material-symbols:label" class="text-(--primary)" />
+                {i18n(I18nKey.dramaTags)}
+              </h3>
+              <div class="flex flex-wrap gap-2">
+                {item.tags.map((tag) => (
+                  <span class="px-3 py-1.5 text-sm bg-(--btn-regular-bg) text-(--btn-content) rounded-lg hover:bg-(--primary)/10 hover:text-(--primary) transition-colors cursor-default">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <!-- 网盘下载区域 -->
+          {links.length > 0 && (
+            <div class="border-t border-(--line-divider) pt-6">
+              <h3 class="text-lg font-bold text-neutral-900 dark:text-neutral-100 mb-4 flex items-center gap-2">
+                <Icon name="material-symbols:cloud-download" class="text-(--primary)" />
+                获取资源
+              </h3>
+              <div class="space-y-3">
+                {links.map((linkInfo, index) => (
+                  <a
+                    href={linkInfo.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="group flex items-center justify-between p-4 rounded-xl border-2 border-(--line-divider) hover:border-(--primary) hover:shadow-lg transition-all duration-200 bg-white dark:bg-gray-800"
+                  >
+                    <div class="flex items-center gap-3">
+                      <div class="h-10 w-10 rounded-lg bg-(--primary)/10 flex items-center justify-center group-hover:bg-(--primary)/20 transition-colors">
+                        <Icon name={getDriveIcon(linkInfo.type)} class="text-2xl text-(--primary)" />
+                      </div>
+                      <div>
+                        <div class="font-semibold text-neutral-900 dark:text-neutral-100">{linkInfo.type}</div>
+                        <div class="text-xs text-neutral-500 dark:text-neutral-500">点击跳转到网盘页面</div>
+                      </div>
+                    </div>
+                    <Icon name="material-symbols:arrow-outward" class="text-xl text-neutral-400 group-hover:text-(--primary) transition-colors" />
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <!-- 更新时间 -->
+          {item.updatedAt && (
+            <div class="mt-6 pt-4 border-t border-(--line-divider) text-xs text-neutral-500 dark:text-neutral-500 flex items-center gap-2">
+              <Icon name="material-symbols:update" class="text-sm" />
+              <span>最后更新：{formatDateI18nWithTime(new Date(item.updatedAt))}</span>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  </div>
+</MainGridLayout>
