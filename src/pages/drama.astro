@@ -242,54 +242,10 @@ function getAllItems(): Array<DramaItem & { categoryId: string; categoryName: st
 		</div>
     </div>
   </div>
-</MainGridLayout>
 
-<style>
-  .tab-content {
-    display: block;
-    animation: fadeInUp 0.4s ease-out;
-  }
-  
-  .tab-content.hidden {
-    display: none;
-  }
-  
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(15px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  .line-clamp-1 {
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-  
-  .line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-  
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-  
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
-</style>
 
-<script is:inline>
+
+  <script is:inline>
   (function() {
     var isInitialized = false;
     
@@ -469,36 +425,89 @@ function getAllItems(): Array<DramaItem & { categoryId: string; categoryName: st
       }
     }
 
-    // 初始化
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(function() {
-          initDramaTabs();
-          initSearch();
-        }, 100);
-      });
-    } else {
+    // 初始化函数
+    function initializeComponents() {
+      isInitialized = false;
       setTimeout(function() {
         initDramaTabs();
         initSearch();
       }, 100);
     }
 
-    // SWUP 事件
-    document.addEventListener('swup:contentReplaced', function() {
-      isInitialized = false;
-      setTimeout(function() {
-        initDramaTabs();
-        initSearch();
-      }, 100);
-    });
+    // 初始化
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeComponents);
+    } else {
+      initializeComponents();
+    }
 
-    window.addEventListener('astro:page-load', function() {
-      isInitialized = false;
-      setTimeout(function() {
-        initDramaTabs();
-        initSearch();
-      }, 100);
-    });
+    // SWUP 事件处理 - 使用与 Layout.astro 相同的事件机制
+    function setupSwupIntegration() {
+      if (window?.swup?.hooks) {
+        // 直接使用 Swup hooks
+        window.swup.hooks.on("content:replace", initializeComponents);
+      } else {
+        // 监听 Swup 启用事件
+        document.addEventListener("swup:enable", function() {
+          if (window?.swup?.hooks) {
+            window.swup.hooks.on("content:replace", initializeComponents);
+          }
+        });
+        
+        // 兼容旧版本的事件监听
+        document.addEventListener('swup:contentReplaced', initializeComponents);
+        document.addEventListener('astro:page-load', initializeComponents);
+      }
+    }
+
+    // 设置 Swup 集成
+    setupSwupIntegration();
   })();
 </script>
+</MainGridLayout>
+
+<style>
+  .tab-content {
+    display: block;
+    animation: fadeInUp 0.4s ease-out;
+  }
+  
+  .tab-content.hidden {
+    display: none;
+  }
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(15px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+</style>
+

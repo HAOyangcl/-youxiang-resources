@@ -18,7 +18,7 @@ interface Props {
 const { class: className, style } = Astro.props;
 
 // 从配置中获取站点开始日期
-const siteStartDate = siteConfig.siteStartDate || "2026-04-12";
+const siteStartDate = siteConfig.siteStartDate || "2025-01-01";
 
 // 获取所有文章
 const posts = await getSortedPosts();
@@ -49,26 +49,14 @@ function formatNumber(num: number): string {
 	return num.toLocaleString();
 }
 
-// // 获取最新文章日期（用于客户端计算）
-// const latestPost = posts.reduce((latest, post) => {
-// 	if (!latest) return post;
-// 	return post.data.published > latest.data.published ? post : latest;
-// }, posts[0]);
+// 获取最新文章日期（用于客户端计算）
+const latestPost = posts.reduce((latest, post) => {
+	if (!latest) return post;
+	return post.data.published > latest.data.published ? post : latest;
+}, posts[0]);
 
-// const lastPostDate = latestPost
-// 	? latestPost.data.published.toISOString()
-// 	: null;
-// ✅ 修复：空文章时 latestPost = null
-const latestPost = posts.length > 0
-	? posts.reduce((latest, post) => {
-			if (!latest) return post;
-			return post.data.published > latest.data.published ? post : latest;
-		}, posts[0])
-	: null;
-
-// ✅ 修复：安全获取时间
-const lastPostDate = latestPost && latestPost.data?.published
-	? new Date(latestPost.data.published).toISOString()
+const lastPostDate = latestPost
+	? latestPost.data.published.toISOString()
 	: null;
 
 const todayText = i18n(I18nKey.today);
@@ -159,49 +147,26 @@ const stats = [
     });
 
     // 更新最后活动时间
-    let daysSinceLastUpdate = -1;
-    // if (lastPostDate) {
-    //   const lastPost = new Date(lastPostDate);
-    //   const timeSinceLastPost = Math.abs(today.getTime() - lastPost.getTime());
-    //   const daysSinceLastUpdate = Math.floor(timeSinceLastPost / (1000 * 60 * 60 * 24));
-
-    //   const lastUpdateElements = document.querySelectorAll('[data-stat-id="last-update"]');
-    //   lastUpdateElements.forEach((element) => {
-    //     if (daysSinceLastUpdate === 0) {
-    //       element.textContent = todayText;
-    //       if (element.nextElementSibling) {
-    //         element.nextElementSibling.style.display = 'none';
-    //       }
-    //     } else {
-    //       element.textContent = daysSinceLastUpdate.toString();
-    //       if (element.nextElementSibling) {
-    //         element.nextElementSibling.style.display = '';
-    //       }
-    //     }
-    //   });
-    // }
-
     if (lastPostDate) {
-      const lastPostTime = new Date(lastPostDate).getTime();
-      if (!isNaN(lastPostTime) && lastPostTime > 0) {
-        daysSinceLastUpdate = Math.floor(Math.abs(today.getTime() - lastPostTime) / (1000 * 60 * 60 * 24));
-      }
-    }
+      const lastPost = new Date(lastPostDate);
+      const timeSinceLastPost = Math.abs(today.getTime() - lastPost.getTime());
+      const daysSinceLastUpdate = Math.floor(timeSinceLastPost / (1000 * 60 * 60 * 24));
 
-    const lastUpdateElements = document.querySelectorAll('[data-stat-id="last-update"]');
-    lastUpdateElements.forEach((element) => {
-      const suffixEl = element.nextElementSibling;
-      if (daysSinceLastUpdate === -1) {
-        element.textContent = "暂无";
-        if (suffixEl) suffixEl.style.display = "none";
-      } else if (daysSinceLastUpdate === 0) {
-        element.textContent = todayText;
-        if (suffixEl) suffixEl.style.display = "none";
-      } else {
-        element.textContent = daysSinceLastUpdate;
-        if (suffixEl) suffixEl.style.display = "";
-      }
-    });
+      const lastUpdateElements = document.querySelectorAll('[data-stat-id="last-update"]');
+      lastUpdateElements.forEach((element) => {
+        if (daysSinceLastUpdate === 0) {
+          element.textContent = todayText;
+          if (element.nextElementSibling) {
+            element.nextElementSibling.style.display = 'none';
+          }
+        } else {
+          element.textContent = daysSinceLastUpdate.toString();
+          if (element.nextElementSibling) {
+            element.nextElementSibling.style.display = '';
+          }
+        }
+      });
+    }
   }
 
   // 页面加载时更新
